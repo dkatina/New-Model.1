@@ -5,7 +5,6 @@ class TicketSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model= Service_Ticket
         include_fk = True
-        include_relationships = True
 
 
 service_ticket_schema = TicketSchema()

@@ -4,6 +4,7 @@ class DevelopmentConfig:
     DEBUG = True
     CACHE_TYPE = "SimpleCache"
     CACHE_DEFAULT_TIMEOUT: 300
+    
 class TestingConfig:
     pass
 

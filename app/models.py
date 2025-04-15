@@ -50,3 +50,25 @@ class Service_Ticket(Base):
 
     customer: Mapped['Customer'] = db.relationship(back_populates="tickets")
     mechanics: Mapped[List['Mechanic']] = db.relationship(secondary=ticket_mechanic, back_populates="tickets")
+    ticket_items: Mapped[List['SerialItem']] = db.relationship(back_populates = 'ticket')
+
+
+class ItemDesc(Base):
+    __tablename__ = "item_descs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(db.String(255), nullable=False)
+    price: Mapped[float] = mapped_column(db.Float, nullable=False)
+
+    serial_items: Mapped[List['SerialItem']] = db.relationship(back_populates = 'description')
+
+
+class SerialItem(Base):
+    __tablename__ = "serial_items"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    description_id: Mapped[int] = mapped_column(db.ForeignKey("item_descs.id"))
+    ticket_id: Mapped[int] = mapped_column(db.ForeignKey("service_tickets.id"), nullable=True)
+
+    description: Mapped['ItemDesc'] = db.relationship(back_populates = 'serial_items')
+    ticket: Mapped['Service_Ticket'] = db.relationship(back_populates = 'ticket_items')

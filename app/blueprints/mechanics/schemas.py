@@ -9,3 +9,13 @@ class MechanicSchema(ma.SQLAlchemyAutoSchema):
 mechanic_schema = MechanicSchema()
 mechanics_schema = MechanicSchema(many=True)
 login_schema = MechanicSchema(exclude=['name', 'id', 'phone', 'salary'])
+
+
+
+class MechanicActivitySchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Mechanic
+        include_relationships = True
+
+mechnic_activity_schema = MechanicActivitySchema(many=True)
+
