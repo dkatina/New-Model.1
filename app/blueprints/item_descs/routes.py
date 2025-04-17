@@ -3,7 +3,7 @@ from marshmallow import ValidationError
 from sqlalchemy import select
 from . import item_descs_bp
 from .schemas import item_desc_schema, item_descs_schema
-from app.models import ItemDesc, db
+from app.models import ItemDesc, db, SerialItem
 from app.extensions import limiter, cache
 
 #CREATE item_desc
@@ -64,3 +64,21 @@ def delete_item_desc(item_desc_id):
         return jsonify(f"Item Description {item_desc_id} deleted"), 200
     
     return jsonify({"error": "Invalid item_desc_id"})
+
+@item_descs_bp.route("/search", methods=['GET'])
+def search_item():
+    name = request.args.get('item')
+
+    query = select(ItemDesc).where(ItemDesc.name.ilike(f'%{name}%'))
+    item_desc = db.session.execute(query).scalars().first()
+
+    stock_query = select(SerialItem).where(SerialItem.description.has(name = item_desc.name), SerialItem.ticket_id == None)
+    stock = len(db.session.execute(stock_query).scalars().all())
+
+    if item_desc:
+        return jsonify({
+            'item': item_desc_schema.dump(item_desc),
+            'stock': stock
+        })
+    return jsonify({"error": "No items match this search"})
+

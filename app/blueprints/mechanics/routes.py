@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from marshmallow import ValidationError
 from sqlalchemy import select
 from . import mechanics_bp
-from .schemas import mechanic_schema, mechanics_schema, login_schema, mechnic_activity_schema
+from .schemas import mechanic_schema, mechanics_schema, login_schema, mechnic_activity_schema, update_mechanic_schema
 from app.models import Mechanic, db
 from app.extensions import limiter, cache
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -64,7 +64,7 @@ def get_mechanincs():
 @token_required
 def update_mechanic():
     try:
-        mechanic_data = mechanic_schema.load(request.json)
+        mechanic_data = update_mechanic_schema.load(request.json)
     except ValidationError as e:
         return jsonify(e.messages), 400
     
@@ -80,11 +80,11 @@ def update_mechanic():
     return jsonify({"error": "invalid mechanic_id"})
 
 #DELETE
-@mechanics_bp.route("/<int:mechanic_id>", methods=['DELETE'])
+@mechanics_bp.route("/", methods=['DELETE'])
 @limiter.limit("50/day")
 @token_required
-def delete_mechanic(mechanic_id):
-    mechanic = db.session.get(Mechanic, mechanic_id)
+def delete_mechanic():
+    mechanic = db.session.get(Mechanic, request.mechanic_id)
 
     if mechanic:
         db.session.delete(mechanic)
@@ -114,6 +114,14 @@ def search_mechanic():
     mechanics = db.session.execute(query).scalars().all()
     return jsonify({"mechanics": mechanics_schema.dump(mechanics)})
 
+#Route with Path Parameter
+@mechanics_bp.route('/<int:mechanic_id>', methods=['GET'])
+def get_mechanic(mechanic_id):
+    mechanic = db.session.get(Mechanic, mechanic_id)
+
+    if mechanic:
+        return mechanic_schema.jsonify(mechanic), 200
+    return jsonify({"error": "Invalid mechanic_id"}), 400
 
 
 @mechanics_bp.route('/pagenated', methods=['GET'])

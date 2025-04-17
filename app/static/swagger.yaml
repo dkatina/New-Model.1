@@ -1,0 +1,224 @@
+swagger: '2.0'
+info:
+  title: "Mechaninc API"
+  description: "API to manage a Mechanis Shop"
+  version: "1.0.0"
+host: "127.0.0.1:5000"
+schemes:
+  - "http"
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+
+securityDefinitions:
+  bearerAuth:
+    type: apiKey
+    name: Authorization
+    in: header
+
+
+paths:
+
+  /mechanics:
+    post:
+      tags:
+        - Mechanics
+      summary: Create a mechanic
+      description: Send a JSON payload with mechanic information to create a new mechanic in the database.
+      parameters:
+        - in: body
+          name: body
+          description: Information of mechanic to be created
+          required: true
+          schema:
+            $ref: '#/definitions/MechanicPayload'
+      responses:
+        201:
+          description: Successful Creation
+          schema:
+            $ref: '#/definitions/MechanicResponse'
+          examples:
+            application/json:
+              email: example@email.com
+              id: 1
+              name: John Doe
+              password: <Hashed Password>
+              phone: 1234567890
+              salary: 85000.00
+
+    get:
+      tags:
+        - Mechanics
+      summary: Retrieve all Mechanics
+      description: Retrieve an array of mechanic objects
+      responses:
+        200:
+          description: "Successful retrieval of Mechanics"
+          schema:
+            $ref: '#/definitions/MechanicListResponse'
+
+    delete:
+      tags:
+        - Mechanics
+      summary: Delete a Mechanic Account
+      description: Token Authenticated route, to delete the mechanic who is logged in (owns the token)
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: "Successful Account Deletion"
+          schema:
+            type: string
+          examples:
+            application/json:
+              mechanic deleted
+
+  /mechanics/login:
+    post:
+      tags:
+        - Mechanics
+      summary: Login a Mechanic (generates token)
+      description: Send a JSON payload with mechanic credentials, and mints a mechanic specific token upon credential validation.
+      parameters:
+        - in: body
+          name: body
+          description: Login Credentials
+          required: true
+          schema:
+            $ref: '#/definitions/LoginPayload'
+      responses:
+        200:
+          description: Successful Login
+          schema:
+            $ref: '#/definitions/LoginResponse'
+          examples:
+            application/json:
+              token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+  /mechanics/{id}:
+    get:
+      tags:
+        - Mechanics
+      summary: Get a Specific Mechanic using ID
+      description: Pass in a Mechanic ID as a path parameter and returns specified mechanic.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          description: The Mechanic ID
+      responses:
+        200:
+          description: "Successful Query"
+          schema:
+            $ref: "#/definitions/MechanicResponse"
+
+  /mechanics/search:
+    get:
+      tags:
+        - Mechanics
+      summary: Search Mechanic(s) by name
+      description: Recieves name as a query parameter, and returns all mechanics who's name includes the name past in
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Name of mechanic(s) to search
+      responses:
+        200:
+          description: "Successful Search"
+          schema:
+            $ref: "#/definitions/SearchMechanicsList"
+
+
+
+definitions: 
+
+  MechanicPayload:
+    type: object
+    properties:
+      email:
+        type: "string"
+      name:
+        type: "string"
+      phone:
+        type: "string"
+      salary:
+        type: number
+      password:
+        type: "string"
+
+  MechanicResponse:
+    type: object
+    properties:
+      email:
+        type: "string"
+      id:
+        type: "integer"
+      name:
+        type: "string"
+      password:
+        type: "string"
+      phone:
+        type: "string"
+      salary:
+        type: number
+
+  MechanicListResponse:
+    type: array
+    items:
+      type: object
+      properties:
+        email:
+          type: "string"
+        id:
+          type: "integer"
+        name:
+          type: "string"
+        password:
+          type: "string"
+        phone:
+          type: "string"
+        salary:
+          type: number
+
+  SearchMechanicsList:
+    type: object
+    properties:
+      mechanics:
+        type: array
+        items:
+          type: object
+          properties:
+            email:
+              type: "string"
+            id:
+              type: "integer"
+            name:
+              type: "string"
+            password:
+              type: "string"
+            phone:
+              type: "string"
+            salary:
+              type: number
+
+  LoginPayload:
+    type: object
+    properties:
+      email:
+        type: "string"
+      password:
+        type: "string"
+
+  LoginResponse:
+    type: object
+    properties:
+      token:
+        type: string
+      
+      
